@@ -18,8 +18,6 @@ class Depper extends Transform {
     _transform(chunk, encoding, callback) {
         let self = this;
 
-        console.log(chunk);
-
         let resolve = function (file, parent) {
             let ext = path.extname(file);
 
@@ -42,7 +40,7 @@ class Depper extends Transform {
 
                     self.push(file);
                 }
-
+                
                 try {
                     let parseTree = self.gonzales.parse(data.toString(), {
                         syntax: self.syntax
