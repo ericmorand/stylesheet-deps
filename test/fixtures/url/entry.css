@@ -10,6 +10,14 @@
   background: url(./foo-bar.png);
 }
 
+.absolute {
+  background: url("http://foo.bar/foo.png");
+}
+
+.absolute-with-no-protocol {
+  background: url("//foo.bar/foo.png");
+}
+
 @font-face {
   src: url("./foo.eot")
 }
