@@ -39,49 +39,49 @@ class Depper extends Transform {
                     self.visited.set(file, true);
 
                     self.push(file);
-                }
-                
-                try {
-                    let parseTree = self.gonzales.parse(data.toString(), {
-                        syntax: self.syntax
-                    });
 
-                    parseTree.traverseByType('atrule', function (node) {
-                        let atKeywordNode = node.first('atkeyword');
+                    try {
+                        let parseTree = self.gonzales.parse(data.toString(), {
+                            syntax: self.syntax
+                        });
 
-                        let identNode = atKeywordNode.first('ident');
+                        parseTree.traverseByType('atrule', function (node) {
+                            let atKeywordNode = node.first('atkeyword');
 
-                        if (identNode.content == 'import') {
+                            let identNode = atKeywordNode.first('ident');
+
+                            if (identNode.content == 'import') {
+                                let stringNode = node.first('string');
+                                let uri = unquote(stringNode.content);
+                                let dependency = path.resolve(path.dirname(file), uri);
+
+                                if (path.extname(dependency).length == 0) {
+                                    dependency += ext;
+                                }
+
+                                resolve(dependency, file);
+                            }
+                        });
+
+                        parseTree.traverseByType('uri', function (node) {
                             let stringNode = node.first('string');
+
+                            if (!stringNode) {
+                                stringNode = node.first('raw');
+                            }
+
                             let uri = unquote(stringNode.content);
                             let dependency = path.resolve(path.dirname(file), uri);
 
-                            if (path.extname(dependency).length == 0) {
-                                dependency += ext; // @todo should be an option
-                            }
-
                             resolve(dependency, file);
-                        }
-                    });
-
-                    parseTree.traverseByType('uri', function (node) {
-                        let stringNode = node.first('string');
-
-                        if (!stringNode) {
-                            stringNode = node.first('raw');
-                        }
-
-                        let uri = unquote(stringNode.content);
-                        let dependency = path.resolve(path.dirname(file), uri);
-
-                        resolve(dependency, file);
-                    });
-                }
-                catch (err) {
-                    throw({
-                        file: file,
-                        error: err
-                    });
+                        });
+                    }
+                    catch (err) {
+                        throw({
+                            file: file,
+                            error: err
+                        });
+                    }
                 }
             }
         };
