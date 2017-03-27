@@ -1,0 +1,6 @@
+@import './foo.css';
+@import "./bar.css";
+
+@page  {
+  @import "./page.css";
+}
