@@ -17,7 +17,7 @@ class Depper extends Transform {
 
     _transform(chunk, encoding, callback) {
         let self = this;
-        
+
         let resolve = function (file, parent) {
             let ext = path.extname(file);
 

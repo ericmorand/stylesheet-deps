@@ -122,6 +122,12 @@ tap.test('depper', function (test) {
             test.end();
         });
 
+        d.on('error', function (err) {
+            test.fail(err);
+
+            test.end();
+        });
+
         d.end(entry);
     });
 
