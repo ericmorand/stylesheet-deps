@@ -47,7 +47,9 @@ tap.test('depper', function (test) {
                 path.join(__dirname, '/fixtures/url/foo.png'),
                 path.join(__dirname, '/fixtures/url/bar.png'),
                 path.join(__dirname, '/fixtures/url/foo-bar.png'),
-                path.join(__dirname, '/fixtures/url/foo.eot')
+                path.join(__dirname, '/fixtures/url/foo.eot'),
+                '//foo.bar/foo.png',
+                'http://foo.bar/foo.png'
             ].sort());
 
             test.end();
@@ -83,17 +85,12 @@ tap.test('depper', function (test) {
 
         let rows = [];
 
-        d.on('data', function (row) {
-            rows.push(row);
-        });
-
         d.on('missing', function (row) {
             rows.push(row);
         });
 
         d.on('finish', function () {
             test.same(rows.sort(), [
-                path.join(__dirname, '/fixtures/missing/entry.css'),
                 path.join(__dirname, '/fixtures/missing/missing.css')
             ].sort());
 
