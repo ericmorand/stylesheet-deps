@@ -1,6 +1,6 @@
 {
   "name": "stylesheet-deps",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Walk the dependency graph of a stylesheet.",
   "main": "src/index.js",
   "scripts": {
