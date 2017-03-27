@@ -1,0 +1,15 @@
+.simple-quote {
+  background: url('./foo.png');
+}
+
+.double-quotes {
+  background: url("./bar.png");
+}
+
+.no-quote {
+  background: url(./foo-bar.png);
+}
+
+@font-face {
+  src: url("./foo.eot")
+}

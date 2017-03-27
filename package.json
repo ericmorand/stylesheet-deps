@@ -1,0 +1,33 @@
+{
+  "name": "stylesheet-deps",
+  "version": "0.1.0",
+  "description": "Walk the dependency graph of a stylesheet.",
+  "main": "src/index.js",
+  "scripts": {
+    "pretest": "npm prune && npm update",
+    "test": "tap test/*.js --cov --reporter=spec --100"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericmorand/stylesheet-deps.git"
+  },
+  "keywords": [
+    "css",
+    "less",
+    "sass",
+    "scss"
+  ],
+  "author": "Eric MORAND",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ericmorand/stylesheet-deps/issues"
+  },
+  "homepage": "https://github.com/ericmorand/stylesheet-deps#readme",
+  "devDependencies": {
+    "tap": "^10.3.0"
+  },
+  "dependencies": {
+    "gonzales-pe": "^4.0.3",
+    "unquote": "^1.1.0"
+  }
+}
