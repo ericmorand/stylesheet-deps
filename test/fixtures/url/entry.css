@@ -1,13 +1,13 @@
 .simple-quote {
-  background: url('./foo.png');
+  background: url('../assets/foo.png');
 }
 
 .double-quotes {
-  background: url("./bar.png");
+  background: url("../assets/bar.png");
 }
 
 .no-quote {
-  background: url(./foo-bar.png);
+  background: url(../assets/foo-bar.png);
 }
 
 .absolute {
@@ -23,5 +23,5 @@
 }
 
 @font-face {
-  src: url("./foo.eot")
+  src: url("../assets/foo.eot")
 }
