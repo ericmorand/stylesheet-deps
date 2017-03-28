@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 tap.test('depper', function (test) {
-    test.plan(8);
+    test.plan(7);
 
     test.test('should handle import', function (test) {
         let d = new Depper();
@@ -21,16 +21,12 @@ tap.test('depper', function (test) {
         });
 
         d.on('error', function (err) {
-            console.log(err);
-
             t.fail();
 
             t.end();
         });
 
         d.on('finish', function () {
-            console.log(rows);
-
             test.same(rows.sort(), [
                 path.join(__dirname, '/fixtures/import/entry.css'),
                 path.join(__dirname, '/fixtures/import/foo.css'),
@@ -99,27 +95,6 @@ tap.test('depper', function (test) {
                 path.join(__dirname, '/fixtures/url-inside-import/foo.css'),
                 path.join(__dirname, '/fixtures/assets/foo.png')
             ].sort());
-
-            test.end();
-        });
-
-        d.end(entry);
-    });
-
-    test.test('should emit "error" event', function (test) {
-        let d = new Depper();
-        let entry = path.join(__dirname, '/fixtures/error/entry.css');
-
-        let rows = [];
-
-        d.on('error', function (err) {
-            rows.push(err);
-        });
-
-        d.on('finish', function () {
-            test.equal(rows.length, 1);
-            test.equal(rows[0].file, path.join(__dirname, '/fixtures/error/entry.css'));
-            test.ok(rows[0].error);
 
             test.end();
         });
