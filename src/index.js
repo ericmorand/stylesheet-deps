@@ -19,135 +19,147 @@ class Depper extends Transform {
     _transform(chunk, encoding, callback) {
         let self = this;
 
-        let resolve = function (file, parent) {
-            let ext = path.extname(file);
+        let resolveData = function (data, file, parent) {
+            try {
+                let processNode = function (node) {
+                    let uri = unquote(node.content);
+                    let url = Url.parse(uri, false, true);
 
-            let candidates = [file];
+                    let dependency = null;
+                    let remote = (url.host !== null);
 
-            switch (self.syntax) {
-                case 'sass':
-                case 'scss': {
-                    // partial syntax support
-                    switch (ext) {
-                        case '.sass':
-                        case '.scss': {
-                            let basename = path.basename(file);
-                            let dirname = path.dirname(file);
-
-                            basename = '_' + basename;
-
-                            let candidate = path.join(dirname, basename);
-
-                            candidates.push(candidate);
-                        }
-                    }
-                }
-            }
-
-            let processNode = function (node) {
-                let uri = unquote(node.content);
-                let url = Url.parse(uri, false, true);
-
-                let dependency = null;
-                let remote = (url.host !== null);
-
-                if (remote) {
-                    dependency = uri;
-                }
-                else {
-                    if (path.extname(uri).length === 0) {
-                        uri += ext;
-                    }
-
-                    if (path.isAbsolute(uri)) {
+                    if (remote) {
                         dependency = uri;
                     }
                     else {
-                        dependency = path.resolve(path.dirname(file), uri);
-                    }
-                }
-
-                resolve(dependency, file);
-            };
-
-            let missing = false;
-            let data = null;
-
-            let candidate = candidates.find(function (candidate) {
-                try {
-                    data = fs.readFileSync(candidate);
-
-                    return true;
-                }
-                catch (err) {
-                    // noop, we just catch this
-                }
-            });
-
-            if (!candidate) {
-                candidates.forEach(function (candidate) {
-                    self.emit('missing', candidate, parent);
-                });
-            }
-            else {
-                file = candidate;
-
-                if (!self.visited.has(file)) {
-                    self.visited.set(file, true);
-
-                    self.push(file);
-
-                    try {
-                        let parseTree = self.gonzales.parse(data.toString(), {
-                            syntax: self.syntax
-                        });
-
-                        parseTree.traverseByType('atrule', function (node) {
-                            let atKeywordNode = node.first('atkeyword');
-
-                            let identNode = atKeywordNode.first('ident');
-
-                            if (identNode.content === 'import') {
-                                let stringNode = node.first('string');
-
-                                processNode(stringNode);
-                            }
-                        });
-
-                        switch (self.syntax) {
-                            case 'css': {
-                                parseTree.traverseByType('uri', function (node) {
-                                    let stringNode = node.first('string');
-
-                                    if (!stringNode) {
-                                        stringNode = node.first('raw');
-                                    }
-
-                                    processNode(stringNode);
-                                });
-
-                                break;
+                        if (self.syntax !== 'css') {
+                            if (path.extname(uri).length === 0) {
+                                uri += '.' + self.syntax;
                             }
                         }
+
+                        if (path.isAbsolute(uri)) {
+                            dependency = uri;
+                        }
+                        else {
+                            dependency = path.resolve(path.dirname(file), uri);
+                        }
+                    }
+
+                    resolveFile(dependency, file);
+                };
+
+                let parseTree = self.gonzales.parse(data.toString(), {
+                    syntax: self.syntax
+                });
+
+                parseTree.traverseByType('atrule', function (node) {
+                    let atKeywordNode = node.first('atkeyword');
+
+                    let identNode = atKeywordNode.first('ident');
+
+                    if (identNode.content === 'import') {
+                        let stringNode = node.first('string');
+
+                        processNode(stringNode);
+                    }
+                });
+
+                switch (self.syntax) {
+                    case 'css': {
+                        parseTree.traverseByType('uri', function (node) {
+                            let stringNode = node.first('string');
+
+                            if (!stringNode) {
+                                stringNode = node.first('raw');
+                            }
+
+                            processNode(stringNode);
+                        });
+
+                        break;
+                    }
+                }
+            }
+            catch (err) {
+                throw({
+                    file: file,
+                    error: err
+                });
+            }
+        };
+
+        let resolveFile = function (file, parent) {
+            if (!self.visited.has(file)) {
+                self.visited.set(file, true);
+
+                let candidates = [file];
+
+                switch (self.syntax) {
+                    case 'sass':
+                    case 'scss': {
+                        let basename = path.basename(file);
+                        let dirname = path.dirname(file);
+
+                        basename = '_' + basename;
+
+                        let candidate = path.join(dirname, basename);
+
+                        candidates.push(candidate);
+                    }
+                }
+
+                let missing = false;
+                let data = null;
+
+                let candidate = candidates.find(function (candidate) {
+                    try {
+                        data = fs.readFileSync(candidate);
+
+                        return true;
                     }
                     catch (err) {
-                        throw({
-                            file: file,
-                            error: err
-                        });
+                        // noop, we just catch this
                     }
+                });
+
+                if (!candidate) {
+                    candidates.forEach(function (candidate) {
+                        self.emit('missing', candidate, parent);
+                    });
+                }
+                else {
+                    self.push(candidate);
+
+                    resolveData(data, candidate);
                 }
             }
         };
 
         try {
-            resolve(chunk.toString(), null);
+            let file = chunk.toString();
+
+            if (this.inlineSource) {
+                resolveData(this.inlineSource, file);
+            }
+            else {
+                resolveFile(file, null);
+            }
 
             callback();
         }
         catch (err) {
             callback(err);
         }
+    }
+
+    inline(source, basedir, callback) {
+        this.inlineSource = source;
+
+        let inlineName = '__INLINE__' + Math.random();
+        let file = path.resolve(basedir || process.cwd(), inlineName);
+
+        this.write(file, 'utf8', callback);
     }
 }
 

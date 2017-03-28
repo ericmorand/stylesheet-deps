@@ -1,7 +1,7 @@
 @import "./bar";
 
 .foo {
-    @import "./foo";
+    @import "./foo.scss";
     @import "./missing";
 
     background: url("../../assets/foo.png");
