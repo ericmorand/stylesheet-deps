@@ -20,39 +20,47 @@ class Depper extends Transform {
         let self = this;
 
         let resolveData = function (data, file, parent) {
-            try {
-                let processNode = function (node) {
-                    let uri = unquote(node.content);
-                    let url = Url.parse(uri, false, true);
 
-                    let dependency = null;
-                    let remote = (url.host !== null);
+            let processNode = function (node) {
+                let uri = unquote(node.content);
+                let url = Url.parse(uri, false, true);
 
-                    if (remote) {
+                let dependency = null;
+                let remote = (url.host !== null);
+
+                if (remote) {
+                    dependency = uri;
+                }
+                else {
+                    if (self.syntax !== 'css') {
+                        if (path.extname(uri).length === 0) {
+                            uri += '.' + self.syntax;
+                        }
+                    }
+
+                    if (path.isAbsolute(uri)) {
                         dependency = uri;
                     }
                     else {
-                        if (self.syntax !== 'css') {
-                            if (path.extname(uri).length === 0) {
-                                uri += '.' + self.syntax;
-                            }
-                        }
-
-                        if (path.isAbsolute(uri)) {
-                            dependency = uri;
-                        }
-                        else {
-                            dependency = path.resolve(path.dirname(file), uri);
-                        }
+                        dependency = path.resolve(path.dirname(file), uri);
                     }
+                }
 
-                    resolveFile(dependency, file);
-                };
+                resolveFile(dependency, file);
+            };
 
-                let parseTree = self.gonzales.parse(data.toString(), {
+            let parseTree = null;
+
+            try {
+                parseTree = self.gonzales.parse(data.toString(), {
                     syntax: self.syntax
                 });
+            }
+            catch (err) {
+                // noop, we continue
+            }
 
+            if (parseTree) {
                 parseTree.traverseByType('atrule', function (node) {
                     let atKeywordNode = node.first('atkeyword');
 
@@ -80,12 +88,6 @@ class Depper extends Transform {
                         break;
                     }
                 }
-            }
-            catch (err) {
-                throw({
-                    file: file,
-                    error: err
-                });
             }
         };
 
@@ -136,21 +138,16 @@ class Depper extends Transform {
             }
         };
 
-        try {
-            let file = chunk.toString();
+        let file = chunk.toString();
 
-            if (this.inlineSource) {
-                resolveData(this.inlineSource, file);
-            }
-            else {
-                resolveFile(file, null);
-            }
+        if (this.inlineSource) {
+            resolveData(this.inlineSource, file);
+        }
+        else {
+            resolveFile(file, null);
+        }
 
-            callback();
-        }
-        catch (err) {
-            callback(err);
-        }
+        callback();
     }
 
     inline(source, basedir, callback) {
