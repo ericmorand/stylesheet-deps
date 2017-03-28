@@ -19,8 +19,34 @@ class Depper extends Transform {
     _transform(chunk, encoding, callback) {
         let self = this;
 
-        let resolve = function (file, parent, emitMissing) {
+        let resolve = function (file, parent) {
             let ext = path.extname(file);
+
+            let processNode = function (node) {
+                let uri = unquote(node.content);
+                let url = Url.parse(uri, false, true);
+
+                let dependency = null;
+                let remote = (url.host !== null);
+
+                if (remote) {
+                    dependency = uri;
+                }
+                else {
+                    if (path.extname(uri).length == 0) {
+                        uri += ext;
+                    }
+
+                    if (path.isAbsolute(uri)) {
+                        dependency = uri;
+                    }
+                    else {
+                        dependency = path.resolve(path.dirname(file), uri);
+                    }
+                }
+
+                resolve(dependency, file);
+            };
 
             let missing = false;
             let data = null;
@@ -32,7 +58,7 @@ class Depper extends Transform {
                 missing = true;
             }
 
-            if (emitMissing && missing) {
+            if (missing) {
                 self.emit('missing', file, parent);
             }
             else {
@@ -41,66 +67,45 @@ class Depper extends Transform {
 
                     self.push(file);
 
-                    if (data) {
-                        try {
-                            let parseTree = self.gonzales.parse(data.toString(), {
-                                syntax: self.syntax
-                            });
+                    try {
+                        let parseTree = self.gonzales.parse(data.toString(), {
+                            syntax: self.syntax
+                        });
 
-                            parseTree.traverseByType('atrule', function (node) {
-                                let atKeywordNode = node.first('atkeyword');
+                        parseTree.traverseByType('atrule', function (node) {
+                            let atKeywordNode = node.first('atkeyword');
 
-                                let identNode = atKeywordNode.first('ident');
+                            let identNode = atKeywordNode.first('ident');
 
-                                if (identNode.content == 'import') {
-                                    let stringNode = node.first('string');
-                                    let uri = unquote(stringNode.content);
-                                    let dependency = path.resolve(path.dirname(file), uri);
-
-                                    if (path.extname(dependency).length == 0) {
-                                        dependency += ext;
-                                    }
-
-                                    resolve(dependency, file, true);
-                                }
-                            });
-
-                            parseTree.traverseByType('uri', function (node) {
+                            if (identNode.content == 'import') {
                                 let stringNode = node.first('string');
 
-                                if (!stringNode) {
-                                    stringNode = node.first('raw');
-                                }
+                                processNode(stringNode);
+                            }
+                        });
 
-                                let uri = unquote(stringNode.content);
-                                let url = Url.parse(uri, false, true);
+                        parseTree.traverseByType('uri', function (node) {
+                            let stringNode = node.first('string');
 
-                                let dependency = null;
-                                let absolute = (url.host !== null);
+                            if (!stringNode) {
+                                stringNode = node.first('raw');
+                            }
 
-                                if (absolute) {
-                                    dependency = uri;
-                                }
-                                else {
-                                    dependency = path.resolve(path.dirname(file), uri);
-                                }
-
-                                resolve(dependency, file, !absolute);
-                            });
-                        }
-                        catch (err) {
-                            throw({
-                                file: file,
-                                error: err
-                            });
-                        }
+                            processNode(stringNode);
+                        });
+                    }
+                    catch (err) {
+                        throw({
+                            file: file,
+                            error: err
+                        });
                     }
                 }
             }
         };
 
         try {
-            resolve(chunk.toString(), null, true);
+            resolve(chunk.toString(), null);
 
             callback();
         }

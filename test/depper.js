@@ -16,13 +16,19 @@ tap.test('depper', function (test) {
             rows.push(row);
         });
 
+        d.on('missing', function (row) {
+            rows.push(row);
+        });
+
         d.on('finish', function () {
             test.same(rows.sort(), [
                 path.join(__dirname, '/fixtures/import/entry.css'),
                 path.join(__dirname, '/fixtures/import/foo.css'),
                 path.join(__dirname, '/fixtures/import/bar.css'),
                 path.join(__dirname, '/fixtures/import/foo-bar.css'),
-                path.join(__dirname, '/fixtures/import/page.css')
+                path.join(__dirname, '/fixtures/import/page.css'),
+                '/foo/bar.css',
+                '/bar/foo.css'
             ].sort());
 
             test.end();
@@ -41,6 +47,10 @@ tap.test('depper', function (test) {
             rows.push(row);
         });
 
+        d.on('missing', function (row) {
+            rows.push(row);
+        });
+
         d.on('finish', function () {
             test.same(rows.sort(), [
                 path.join(__dirname, '/fixtures/url/entry.css'),
@@ -48,6 +58,7 @@ tap.test('depper', function (test) {
                 path.join(__dirname, '/fixtures/url/bar.png'),
                 path.join(__dirname, '/fixtures/url/foo-bar.png'),
                 path.join(__dirname, '/fixtures/url/foo.eot'),
+                '/foo/bar.png',
                 '//foo.bar/foo.png',
                 'http://foo.bar/foo.png'
             ].sort());

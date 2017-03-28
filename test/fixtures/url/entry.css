@@ -11,10 +11,14 @@
 }
 
 .absolute {
+  background: url("/foo/bar.png");
+}
+
+.remote-with-protocol {
   background: url("http://foo.bar/foo.png");
 }
 
-.absolute-with-no-protocol {
+.remote-without-protocol {
   background: url("//foo.bar/foo.png");
 }
 
