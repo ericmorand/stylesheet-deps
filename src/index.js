@@ -114,15 +114,21 @@ class Depper extends Transform {
                             }
                         });
 
-                        parseTree.traverseByType('uri', function (node) {
-                            let stringNode = node.first('string');
+                        switch (self.syntax) {
+                            case 'css': {
+                                parseTree.traverseByType('uri', function (node) {
+                                    let stringNode = node.first('string');
 
-                            if (!stringNode) {
-                                stringNode = node.first('raw');
+                                    if (!stringNode) {
+                                        stringNode = node.first('raw');
+                                    }
+
+                                    processNode(stringNode);
+                                });
+
+                                break;
                             }
-
-                            processNode(stringNode);
-                        });
+                        }
                     }
                     catch (err) {
                         throw({

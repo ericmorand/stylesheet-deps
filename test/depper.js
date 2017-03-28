@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 tap.test('depper', function (test) {
-    test.plan(8);
+    test.plan(7);
 
     test.test('should handle import', function (test) {
         let d = new Depper();
@@ -54,13 +54,40 @@ tap.test('depper', function (test) {
         d.on('finish', function () {
             test.same(rows.sort(), [
                 path.join(__dirname, '/fixtures/url/entry.css'),
-                path.join(__dirname, '/fixtures/url/foo.png'),
-                path.join(__dirname, '/fixtures/url/bar.png'),
-                path.join(__dirname, '/fixtures/url/foo-bar.png'),
-                path.join(__dirname, '/fixtures/url/foo.eot'),
+                path.join(__dirname, '/fixtures/assets/foo.png'),
+                path.join(__dirname, '/fixtures/assets/bar.png'),
+                path.join(__dirname, '/fixtures/assets/foo-bar.png'),
+                path.join(__dirname, '/fixtures/assets/foo.eot'),
                 '/foo/bar.png',
                 '//foo.bar/foo.png',
                 'http://foo.bar/foo.png'
+            ].sort());
+
+            test.end();
+        });
+
+        d.end(entry);
+    });
+
+    test.test('should handle url inside import', function (test) {
+        let d = new Depper();
+        let entry = path.join(__dirname, '/fixtures/url-inside-import/entry.css');
+
+        let rows = [];
+
+        d.on('data', function (row) {
+            rows.push(row);
+        });
+
+        d.on('missing', function (row) {
+            rows.push(row);
+        });
+
+        d.on('finish', function () {
+            test.same(rows.sort(), [
+                path.join(__dirname, '/fixtures/url-inside-import/entry.css'),
+                path.join(__dirname, '/fixtures/url-inside-import/foo.css'),
+                path.join(__dirname, '/fixtures/assets/foo.png')
             ].sort());
 
             test.end();
@@ -139,28 +166,12 @@ tap.test('depper', function (test) {
         d.end(entry);
     });
 
-    test.test('should accept syntax option', function (test) {
-        let d = new Depper({
-            syntax: 'scss'
-        });
+    test.test('should handle syntax', function (test) {
+        test.plan(4);
 
-        test.equal(d.syntax, 'scss');
-
-        test.end();
-    });
-
-    let syntaxes = [
-        'sass',
-        'scss'
-    ];
-
-    syntaxes.forEach(function (syntax) {
-        test.test('should handle ' + syntax + ' partial naming', function (test) {
-            let d = new Depper({
-                syntax: syntax
-            });
-
-            let entry = path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/entry.' + syntax);
+        test.test('css', function (test) {
+            let d = new Depper();
+            let entry = path.join(__dirname, '/fixtures/syntax-specific/css/entry.css');
 
             let rows = [];
 
@@ -174,19 +185,102 @@ tap.test('depper', function (test) {
 
             d.on('finish', function () {
                 test.same(rows.sort(), [
-                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/entry.' + syntax),
-                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/_foo.' + syntax),
-                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/bar.' + syntax),
-                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/_bar.' + syntax),
-                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/foo.png'),
-                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/bar.png')
+                    path.join(__dirname, '/fixtures/syntax-specific/css/entry.css'),
+                    path.join(__dirname, '/fixtures/syntax-specific/css/bar.css'),
+                    path.join(__dirname, '/fixtures/assets/foo.png'),
+                    path.join(__dirname, '/fixtures/assets/bar.png')
                 ].sort());
 
                 test.end();
             });
 
-            d.on('error', function (err) {
-                test.fail(err);
+            d.end(entry);
+        });
+
+        test.test('sass', function (test) {
+            let d = new Depper({
+                syntax: 'sass'
+            });
+            let entry = path.join(__dirname, '/fixtures/syntax-specific/sass/entry.sass');
+
+            let rows = [];
+
+            d.on('data', function (row) {
+                rows.push(row);
+            });
+
+            d.on('missing', function (row) {
+                rows.push(row);
+            });
+
+            d.on('finish', function () {
+                test.same(rows.sort(), [
+                    path.join(__dirname, '/fixtures/syntax-specific/sass/entry.sass'),
+                    path.join(__dirname, '/fixtures/syntax-specific/sass/bar.sass'),
+                    path.join(__dirname, '/fixtures/syntax-specific/sass/_foo.sass'),
+                    path.join(__dirname, '/fixtures/syntax-specific/sass/missing.sass'),
+                    path.join(__dirname, '/fixtures/syntax-specific/sass/_missing.sass')
+                ].sort());
+
+                test.end();
+            });
+
+            d.end(entry);
+        });
+
+        test.test('scss', function (test) {
+            let d = new Depper({
+                syntax: 'scss'
+            });
+            let entry = path.join(__dirname, '/fixtures/syntax-specific/scss/entry.scss');
+
+            let rows = [];
+
+            d.on('data', function (row) {
+                rows.push(row);
+            });
+
+            d.on('missing', function (row) {
+                rows.push(row);
+            });
+
+            d.on('finish', function () {
+                test.same(rows.sort(), [
+                    path.join(__dirname, '/fixtures/syntax-specific/scss/entry.scss'),
+                    path.join(__dirname, '/fixtures/syntax-specific/scss/bar.scss'),
+                    path.join(__dirname, '/fixtures/syntax-specific/scss/_foo.scss'),
+                    path.join(__dirname, '/fixtures/syntax-specific/scss/missing.scss'),
+                    path.join(__dirname, '/fixtures/syntax-specific/scss/_missing.scss')
+                ].sort());
+
+                test.end();
+            });
+
+            d.end(entry);
+        });
+
+        test.test('less', function (test) {
+            let d = new Depper({
+                syntax: 'less'
+            });
+            let entry = path.join(__dirname, '/fixtures/syntax-specific/less/entry.less');
+
+            let rows = [];
+
+            d.on('data', function (row) {
+                rows.push(row);
+            });
+
+            d.on('missing', function (row) {
+                rows.push(row);
+            });
+
+            d.on('finish', function () {
+                test.same(rows.sort(), [
+                    path.join(__dirname, '/fixtures/syntax-specific/less/entry.less'),
+                    path.join(__dirname, '/fixtures/syntax-specific/less/bar.less'),
+                    path.join(__dirname, '/fixtures/syntax-specific/less/missing.less')
+                ].sort());
 
                 test.end();
             });

@@ -1,0 +1,8 @@
+@import "./bar";
+
+.foo {
+    @import "./foo";
+    @import "./missing";
+
+    background: url("../../assets/foo.png");
+}
