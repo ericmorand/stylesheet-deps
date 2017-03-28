@@ -28,14 +28,19 @@ class Depper extends Transform {
                 case 'sass':
                 case 'scss': {
                     // partial syntax support
-                    let basename = path.basename(file);
-                    let dirname = path.dirname(file);
+                    switch (ext) {
+                        case '.sass':
+                        case '.scss': {
+                            let basename = path.basename(file);
+                            let dirname = path.dirname(file);
 
-                    basename = '_' + basename;
+                            basename = '_' + basename;
 
-                    let candidate = path.join(dirname, basename);
+                            let candidate = path.join(dirname, basename);
 
-                    candidates.push(candidate);
+                            candidates.push(candidate);
+                        }
+                    }
                 }
             }
 
@@ -68,7 +73,7 @@ class Depper extends Transform {
             let missing = false;
             let data = null;
 
-            let candidate = candidates.find(function(candidate) {
+            let candidate = candidates.find(function (candidate) {
                 try {
                     data = fs.readFileSync(candidate);
 
@@ -80,7 +85,7 @@ class Depper extends Transform {
             });
 
             if (!candidate) {
-                candidates.forEach(function(candidate) {
+                candidates.forEach(function (candidate) {
                     self.emit('missing', candidate, parent);
                 });
             }

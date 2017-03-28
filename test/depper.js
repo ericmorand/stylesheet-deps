@@ -177,7 +177,9 @@ tap.test('depper', function (test) {
                     path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/entry.' + syntax),
                     path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/_foo.' + syntax),
                     path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/bar.' + syntax),
-                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/_bar.' + syntax)
+                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/_bar.' + syntax),
+                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/foo.png'),
+                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/bar.png')
                 ].sort());
 
                 test.end();
