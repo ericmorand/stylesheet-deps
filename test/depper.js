@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 tap.test('depper', function (test) {
-    test.plan(6);
+    test.plan(8);
 
     test.test('should handle import', function (test) {
         let d = new Depper();
@@ -144,29 +144,52 @@ tap.test('depper', function (test) {
             syntax: 'scss'
         });
 
-        let entry = path.join(__dirname, '/fixtures/syntax-scss/entry.scss');
+        test.equal(d.syntax, 'scss');
 
-        let rows = [];
+        test.end();
+    });
 
-        d.on('data', function (row) {
-            rows.push(row);
+    let syntaxes = [
+        'sass',
+        'scss'
+    ];
+
+    syntaxes.forEach(function (syntax) {
+        test.test('should handle ' + syntax + ' partial naming', function (test) {
+            let d = new Depper({
+                syntax: syntax
+            });
+
+            let entry = path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/entry.' + syntax);
+
+            let rows = [];
+
+            d.on('data', function (row) {
+                rows.push(row);
+            });
+
+            d.on('missing', function (row) {
+                rows.push(row);
+            });
+
+            d.on('finish', function () {
+                test.same(rows.sort(), [
+                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/entry.' + syntax),
+                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/_foo.' + syntax),
+                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/bar.' + syntax),
+                    path.join(__dirname, '/fixtures/syntax-' + syntax + '/import/_bar.' + syntax)
+                ].sort());
+
+                test.end();
+            });
+
+            d.on('error', function (err) {
+                test.fail(err);
+
+                test.end();
+            });
+
+            d.end(entry);
         });
-
-        d.on('finish', function () {
-            test.same(rows.sort(), [
-                path.join(__dirname, '/fixtures/syntax-scss/entry.scss'),
-                path.join(__dirname, '/fixtures/syntax-scss/foo.scss')
-            ].sort());
-
-            test.end();
-        });
-
-        d.on('error', function (err) {
-            test.fail(err);
-
-            test.end();
-        });
-
-        d.end(entry);
     });
 });

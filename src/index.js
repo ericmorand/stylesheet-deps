@@ -22,6 +22,23 @@ class Depper extends Transform {
         let resolve = function (file, parent) {
             let ext = path.extname(file);
 
+            let candidates = [file];
+
+            switch (self.syntax) {
+                case 'sass':
+                case 'scss': {
+                    // partial syntax support
+                    let basename = path.basename(file);
+                    let dirname = path.dirname(file);
+
+                    basename = '_' + basename;
+
+                    let candidate = path.join(dirname, basename);
+
+                    candidates.push(candidate);
+                }
+            }
+
             let processNode = function (node) {
                 let uri = unquote(node.content);
                 let url = Url.parse(uri, false, true);
@@ -33,7 +50,7 @@ class Depper extends Transform {
                     dependency = uri;
                 }
                 else {
-                    if (path.extname(uri).length == 0) {
+                    if (path.extname(uri).length === 0) {
                         uri += ext;
                     }
 
@@ -51,17 +68,25 @@ class Depper extends Transform {
             let missing = false;
             let data = null;
 
-            try {
-                data = fs.readFileSync(file);
-            }
-            catch (err) {
-                missing = true;
-            }
+            let candidate = candidates.find(function(candidate) {
+                try {
+                    data = fs.readFileSync(candidate);
 
-            if (missing) {
-                self.emit('missing', file, parent);
+                    return true;
+                }
+                catch (err) {
+                    // noop, we just catch this
+                }
+            });
+
+            if (!candidate) {
+                candidates.forEach(function(candidate) {
+                    self.emit('missing', candidate, parent);
+                });
             }
             else {
+                file = candidate;
+
                 if (!self.visited.has(file)) {
                     self.visited.set(file, true);
 
@@ -77,7 +102,7 @@ class Depper extends Transform {
 
                             let identNode = atKeywordNode.first('ident');
 
-                            if (identNode.content == 'import') {
+                            if (identNode.content === 'import') {
                                 let stringNode = node.first('string');
 
                                 processNode(stringNode);
