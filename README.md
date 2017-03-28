@@ -10,17 +10,21 @@ Walk the dependency graph of a stylesheet.
 npm install stylesheet-deps
 ```
 
-# Methods
+# API
 
-`var SSDeps = require('stylesheet-deps')`
+`let SSDeps = require('stylesheet-deps')`
 
-## let depper = SSDeps(opts={})
+## depper = SSDeps(opts={})
 
 Return an object transform stream `depper` that expects entry filenames.
 
 Optionally pass in some opts:
 
 * opts.syntax - any of the following: `css`, `less`, `sass`, `scss`. Default one is `css`.
+
+## depper.inline(source, basedir, callback)
+
+Adds a new inline file to the dependency graph, where source is the stylesheet source to include and basedir is the directory to pretend it's being created in. A basedir is required to properly resolve dependencies and defaults to process.cwd().
 
 # Example
 

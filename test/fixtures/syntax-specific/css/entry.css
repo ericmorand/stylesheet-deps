@@ -1,4 +1,5 @@
 @import "./bar.css";
+@import "./missing.css";
 
 .foo {
     background: url("../../assets/foo.png");
