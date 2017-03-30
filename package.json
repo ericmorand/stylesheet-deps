@@ -27,6 +27,8 @@
     "tap": "^10.3.0"
   },
   "dependencies": {
+    "css": "^2.2.1",
+    "css-ast-iterations": "^0.5.0",
     "gonzales-pe": "^4.0.3",
     "unquote": "^1.1.0"
   }

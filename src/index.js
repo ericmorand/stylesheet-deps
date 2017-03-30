@@ -3,6 +3,8 @@ const path = require('path');
 const Transform = require('stream').Transform;
 const unquote = require('unquote');
 const Url = require('url');
+const css = require('css');
+const addIterations = require('css-ast-iterations');
 
 class Depper extends Transform {
     constructor(options) {
@@ -18,11 +20,11 @@ class Depper extends Transform {
 
     _transform(chunk, encoding, callback) {
         let self = this;
+        let urlRegex = /url\(([^,)]+)\)/ig;
 
         let resolveData = function (data, file, parent) {
-
-            let processNode = function (node) {
-                let uri = unquote(node.content);
+            let processNodeContent = function (nodeContent) {
+                let uri = unquote(nodeContent);
                 let url = Url.parse(uri, false, true);
 
                 let dependency = null;
@@ -52,41 +54,63 @@ class Depper extends Transform {
             let parseTree = null;
 
             try {
-                parseTree = self.gonzales.parse(data.toString(), {
-                    syntax: self.syntax
-                });
+                if (self.syntax === 'css') {
+                    parseTree = css.parse(data.toString());
+
+                    addIterations(parseTree);
+                }
+                else {
+                    parseTree = self.gonzales.parse(data.toString(), {
+                        syntax: self.syntax
+                    });
+                }
             }
             catch (err) {
                 // noop, we continue
             }
 
             if (parseTree) {
-                parseTree.traverseByType('atrule', function (node) {
-                    let atKeywordNode = node.first('atkeyword');
+                if (self.syntax === 'css') {
+                    let nodeContents = [];
 
-                    let identNode = atKeywordNode.first('ident');
+                    let processNode = function (node) {
+                        let result = null;
 
-                    if (identNode.content === 'import') {
-                        let stringNode = node.first('string');
+                        while (result = urlRegex.exec(node.value)) {
+                            nodeContents.push(result[1]);
+                        }
+                    };
 
-                        processNode(stringNode);
-                    }
-                });
+                    parseTree.findAllImport(function (url) {
+                        nodeContents.push(url);
+                    });
 
-                switch (self.syntax) {
-                    case 'css': {
-                        parseTree.traverseByType('uri', function (node) {
+                    parseTree.findAllRulesByType('font-face', function (rule) {
+                        rule.declarations.forEach(function (node) {
+                            processNode(node);
+                        });
+                    });
+
+                    parseTree.findAllDeclarations(function (node) {
+                        processNode(node);
+                    });
+
+                    nodeContents.forEach(function (nodeContent) {
+                        processNodeContent(nodeContent)
+                    });
+                }
+                else {
+                    parseTree.traverseByType('atrule', function (node) {
+                        let atKeywordNode = node.first('atkeyword');
+
+                        let identNode = atKeywordNode.first('ident');
+
+                        if (identNode.content === 'import') {
                             let stringNode = node.first('string');
 
-                            if (!stringNode) {
-                                stringNode = node.first('raw');
-                            }
-
-                            processNode(stringNode);
-                        });
-
-                        break;
-                    }
+                            processNodeContent(stringNode.content);
+                        }
+                    });
                 }
             }
         };

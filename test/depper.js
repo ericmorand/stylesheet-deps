@@ -32,7 +32,6 @@ tap.test('depper', function (test) {
                 path.join(__dirname, '/fixtures/import/foo.css'),
                 path.join(__dirname, '/fixtures/import/bar.css'),
                 path.join(__dirname, '/fixtures/import/foo-bar.css'),
-                path.join(__dirname, '/fixtures/import/page.css'),
                 '/foo/bar.css',
                 '/bar/foo'
             ].sort());
