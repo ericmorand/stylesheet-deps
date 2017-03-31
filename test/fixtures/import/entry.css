@@ -2,3 +2,7 @@
 @import "./bar.css";
 @import "/foo/bar.css";
 @import "/bar/foo";
+
+@page  {
+  @import "./page.css";
+}
