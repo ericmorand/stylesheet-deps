@@ -33,8 +33,10 @@ class Depper extends Transform {
                 }
                 else {
                     if (self.syntax !== 'css') {
-                        if (path.extname(uri).length === 0) {
-                            uri += '.' + self.syntax;
+                        let ext = '.' + self.syntax;
+
+                        if (path.extname(uri) !== ext) {
+                            uri += ext;
                         }
                     }
 

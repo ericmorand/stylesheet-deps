@@ -208,7 +208,8 @@ tap.test('depper', function (test) {
                 test.same(rows.sort(), [
                     path.join(__dirname, '/fixtures/syntax-specific/less/entry.less'),
                     path.join(__dirname, '/fixtures/syntax-specific/less/bar.less'),
-                    path.join(__dirname, '/fixtures/syntax-specific/less/foo.less')
+                    path.join(__dirname, '/fixtures/syntax-specific/less/foo.less'),
+                    path.join(__dirname, '/fixtures/syntax-specific/less/foo.bar.less')
                 ].sort());
 
                 test.same(missing.sort(), [
@@ -243,6 +244,7 @@ tap.test('depper', function (test) {
                     path.join(__dirname, '/fixtures/syntax-specific/sass/entry.sass'),
                     path.join(__dirname, '/fixtures/syntax-specific/sass/bar.sass'),
                     path.join(__dirname, '/fixtures/syntax-specific/sass/_foo.sass'),
+                    path.join(__dirname, '/fixtures/syntax-specific/sass/foo.bar.sass')
                 ].sort());
 
                 test.same(missing.sort(), [
@@ -277,7 +279,8 @@ tap.test('depper', function (test) {
                 test.same(rows.sort(), [
                     path.join(__dirname, '/fixtures/syntax-specific/scss/entry.scss'),
                     path.join(__dirname, '/fixtures/syntax-specific/scss/bar.scss'),
-                    path.join(__dirname, '/fixtures/syntax-specific/scss/_foo.scss')
+                    path.join(__dirname, '/fixtures/syntax-specific/scss/_foo.scss'),
+                    path.join(__dirname, '/fixtures/syntax-specific/scss/foo.bar.scss')
                 ].sort());
 
                 test.same(missing.sort(), [
