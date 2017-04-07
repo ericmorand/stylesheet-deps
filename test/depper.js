@@ -64,9 +64,11 @@ tap.test('depper', function (test) {
                 path.join(__dirname, '/fixtures/assets/bar.png'),
                 path.join(__dirname, '/fixtures/assets/foo-bar.png'),
                 path.join(__dirname, '/fixtures/assets/foo.eot'),
+                path.join(__dirname, '/fixtures/assets/bar.eot#foo'),
                 '/foo/bar.png',
                 '//foo.bar/foo.png',
-                'http://foo.bar/foo.png'
+                'http://foo.bar/foo.png',
+                '#foo'
             ].sort());
 
             test.end();

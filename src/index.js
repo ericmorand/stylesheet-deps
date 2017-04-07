@@ -23,12 +23,28 @@ class Depper extends Transform {
 
             let processNode = function (node) {
                 let uri = unquote(node.content);
-                let url = Url.parse(uri, false, true);
 
                 let dependency = null;
-                let remote = (url.host !== null);
 
-                if (remote) {
+                let shouldBeReturnedAsIs = function(uri) {
+                    let url = Url.parse(uri, false, true);
+
+                    // if the url consists of only a hash, it is a reference to an id
+                    if (url.hash) {
+                        if (!url.path) {
+                            return true;
+                        }
+                    }
+
+                    // if the url host is set, it is a remote uri
+                    if (url.host) {
+                        return true;
+                    }
+
+                    return false;
+                };
+
+                if (shouldBeReturnedAsIs(uri)) {
                     dependency = uri;
                 }
                 else {
