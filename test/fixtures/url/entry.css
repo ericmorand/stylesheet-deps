@@ -23,7 +23,7 @@
 }
 
 @font-face {
-  src: url("../assets/foo.eot"), url("../assets/bar.eot#foo");
+  src: url("../assets/foo.eot"), url("../assets/foo.eot#bar"), url("../assets/foo.eot?bar");
 }
 
 .svg-id {

@@ -23,12 +23,11 @@ class Depper extends Transform {
 
             let processNode = function (node) {
                 let uri = unquote(node.content);
+                let url = Url.parse(uri, false, true);
 
                 let dependency = null;
 
-                let shouldBeReturnedAsIs = function(uri) {
-                    let url = Url.parse(uri, false, true);
-
+                let shouldBeReturnedAsIs = function() {
                     // if the url consists of only a hash, it is a reference to an id
                     if (url.hash) {
                         if (!url.path) {
@@ -44,10 +43,12 @@ class Depper extends Transform {
                     return false;
                 };
 
-                if (shouldBeReturnedAsIs(uri)) {
+                if (shouldBeReturnedAsIs()) {
                     dependency = uri;
                 }
                 else {
+                    uri = url.pathname;
+
                     if (self.syntax !== 'css') {
                         let ext = '.' + self.syntax;
 
